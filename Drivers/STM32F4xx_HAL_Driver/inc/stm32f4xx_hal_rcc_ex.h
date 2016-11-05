@@ -42,9 +42,6 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-#ifndef STM32F446xx
-	#define STM32F446xx
-#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal_def.h"

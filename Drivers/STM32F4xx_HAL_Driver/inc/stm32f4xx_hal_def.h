@@ -42,11 +42,8 @@
 
 #ifdef __cplusplus
  extern "C" {
- #define __IO volatile
 #endif
-#ifndef STM32F446xx
-	#define STM32F446xx
-#endif
+
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
 #include "Legacy/stm32_hal_legacy.h"

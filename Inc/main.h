@@ -34,14 +34,23 @@
 #ifndef __MAIN_H
 #define __MAIN_H
   /* Includes ------------------------------------------------------------------*/
-#include "stm32f446xx.h"
-#include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_flash_ex.h"
+
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
+
+#define N5110_PWR_PORT
+#define N5110_PWR_PIN
+#define N5110_SCE_PORT GPIOA
+#define N5110_SCE_PIN GPIO_PIN_4
+#define N5110_DC_PORT GPIOB
+#define N5110_DC_PIN GPIO_PIN_9
+#define N5110_RST_PORT GPIOB
+#define N5110_RST_PIN GPIO_PIN_14
+#define N5110_PWR_PORT
+#define N5110_SPIx SPI2
 
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
@@ -51,16 +60,17 @@
 #define USART_RX_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
-#define LCD_R_W_Pin GPIO_PIN_15
-#define LCD_R_W_GPIO_Port GPIOB
-#define LCD_RESET_Pin GPIO_PIN_6
-#define LCD_RESET_GPIO_Port GPIOC
+
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
+
+#define MAX_COUNT 1000
+
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

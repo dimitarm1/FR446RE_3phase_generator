@@ -58,7 +58,6 @@
 
 #ifdef __cplusplus
  extern "C" {
- #define __IO volatile
 #endif /* __cplusplus */
    
 /** @addtogroup Library_configuration_section
@@ -71,10 +70,6 @@
 #if !defined  (STM32F4)
 #define STM32F4
 #endif /* STM32F4 */
-
-#ifndef STM32F446xx
-	#define STM32F446xx
-#endif
 
 /* Uncomment the line below according to the target STM32 device used in your
    application 
