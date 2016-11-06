@@ -126,6 +126,13 @@ int main(void)
 
   // can directly print strings at specified co-ordinates
   N5110_printString("**STM Nucleo**",0,0);
+//  htim1.Instance->CCR1 = 0x01;
+//  htim2.Instance->CCR1 = 0x01;
+//  htim3.Instance->CCR1 = 0x01;
+//  htim4.Instance->CCR1 = 0x01;
+//  htim4.Instance->SMCR = 0x03;
+//  htim1.Instance->CCER = 0x21;
+//  htim1->Instance->DMAR = 0x01;
 
   while (1)
   {
@@ -167,7 +174,7 @@ int main(void)
 //                                             count4, dir4==0 ? "+":"-" );
 
       // int temperature = encoder.getVal();
-      int length = sprintf(buffer,"C1 = %06d ",counter1); // print formatted data to buffer
+      int length = sprintf(buffer,"C1 = %06d ",count1); // print formatted data to buffer
       // it is important the format specifier ensures the length will fit in the buffer
 
       N5110_printString(buffer,1,1);           // display on screen
@@ -301,7 +308,7 @@ static void MX_TIM1_Init(void)
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   HAL_TIM_Encoder_DeInit(&htim1);
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI2;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV4;
@@ -321,7 +328,7 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  if(HAL_TIM_Encoder_Start(TIM1,TIM_CHANNEL_1)!=HAL_OK)
+  if(HAL_TIM_Encoder_Start(&htim1,TIM_CHANNEL_1)!=HAL_OK)
   {
 	Error_Handler();
   }
@@ -341,7 +348,7 @@ static void MX_TIM2_Init(void)
   htim2.Init.Period = MAX_COUNT;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   HAL_TIM_Encoder_DeInit(&htim2);
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI2;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV4;
@@ -362,7 +369,7 @@ static void MX_TIM2_Init(void)
     Error_Handler();
   }
 
-  if(HAL_TIM_Encoder_Start(TIM2,TIM_CHANNEL_1)!=HAL_OK)
+  if(HAL_TIM_Encoder_Start(&htim2,TIM_CHANNEL_1)!=HAL_OK)
   {
     Error_Handler();
   }
@@ -382,7 +389,7 @@ static void MX_TIM3_Init(void)
   htim3.Init.Period = MAX_COUNT;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   HAL_TIM_Encoder_DeInit(&htim3);
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI2;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV4;
@@ -402,7 +409,7 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
-  if(HAL_TIM_Encoder_Start(TIM3,TIM_CHANNEL_1)!=HAL_OK)
+  if(HAL_TIM_Encoder_Start(&htim3,TIM_CHANNEL_1)!=HAL_OK)
   {
     Error_Handler();
   }
@@ -425,24 +432,24 @@ static void MX_TIM4_Init(void)
   sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
-  sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC1Filter = 0x0;
+  sConfig.IC1Prescaler = TIM_ICPSC_DIV4;
+  sConfig.IC1Filter = 0x0F;
   sConfig.IC2Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
-  sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 0x0;
+  sConfig.IC2Prescaler = TIM_ICPSC_DIV4;
+  sConfig.IC2Filter = 0x0F;
   if (HAL_TIM_Encoder_Init(&htim4, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
 
-//  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-//  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-//  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
-//  {
-//    Error_Handler();
-//  }
-  if(HAL_TIM_Encoder_Start(TIM4,TIM_CHANNEL_1)!=HAL_OK)
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if(HAL_TIM_Encoder_Start(&htim4,TIM_CHANNEL_1)!=HAL_OK)
   {
 	Error_Handler();
   }
