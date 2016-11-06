@@ -138,31 +138,31 @@ int main(void)
   {
   /* USER CODE END WHILE */
 	  counter1 = __HAL_TIM_GET_COUNTER(&htim8);
-	  HAL_Delay(100);
+	  HAL_Delay(150);
 
 
       //OK 401 411 446 TICKER 030
       //count1=TIM1->CNT;
       //dir1=TIM1->CR1&TIM_CR1_DIR;
-      count1=__HAL_TIM_GET_COUNTER(&htim1);
+      count1=__HAL_TIM_GET_COUNTER(&htim1)/4;
       dir1 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1);
 
       //OK 401 411 446 NOK 030
       //count2=TIM2->CNT;
       //dir2=TIM2->CR1&TIM_CR1_DIR;
-      count2=__HAL_TIM_GET_COUNTER(&htim2);
+      count2=__HAL_TIM_GET_COUNTER(&htim2)/4;
       dir2 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim2);
 
       //OK 401 411 446 030
       //count3=TIM3->CNT;
       //dir3=TIM3->CR1&TIM_CR1_DIR;
-      count3=__HAL_TIM_GET_COUNTER(&htim3);
+      count3=__HAL_TIM_GET_COUNTER(&htim3)/4;
       dir3 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3);
 
       //OK 401 411 446 N/A 030
       //count4=TIM4->CNT;
       //dir4=TIM4->CR1&TIM_CR1_DIR;
-      count4=__HAL_TIM_GET_COUNTER(&htim4);
+      count4=__HAL_TIM_GET_COUNTER(&htim4)/4;
       dir4 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim4);
 
       //TICKER 401 411 446 N/A 030
@@ -195,7 +195,7 @@ int main(void)
       }
       // need to refresh display after setting pixels
       N5110_refresh();
-      HAL_Delay(500);
+   //   HAL_Delay(500);
 
       // can also check status of pixels using getPixel(x,y)
 
