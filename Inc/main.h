@@ -68,7 +68,7 @@
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
 
-#define MAX_COUNT 1000
+#define MAX_COUNT 60000
 
 
 /* USER CODE BEGIN Private defines */

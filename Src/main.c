@@ -71,6 +71,8 @@ volatile int count1;
 volatile int count2;
 volatile int count3;
 volatile int count4;
+volatile unsigned char phase2 = 2;
+volatile unsigned char phase3 = 3;
 int8_t dir1, dir2, dir3, dir4;
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
@@ -134,10 +136,20 @@ int main(void)
 //  htim1.Instance->CCER = 0x21;
 //  htim1->Instance->DMAR = 0x01;
 
+  count1 = htim8.Init.Period;
+  count2 = TIM8->CCR2;
+  count3 = TIM8->CCR3;
+  count4 = TIM8->CCR4;
+  __HAL_TIM_SET_COUNTER(&htim1,count1*4);
+  __HAL_TIM_SET_COUNTER(&htim2,count2*4);
+  __HAL_TIM_SET_COUNTER(&htim3,count3*4);
+  __HAL_TIM_SET_COUNTER(&htim4,count4*4);
+  __HAL_TIM_ENABLE_IT(&htim8, TIM_IT_UPDATE);
+
   while (1)
   {
   /* USER CODE END WHILE */
-	  counter1 = __HAL_TIM_GET_COUNTER(&htim8);
+	  //counter1 = __HAL_TIM_GET_COUNTER(&htim8);
 	  HAL_Delay(150);
 
 
@@ -146,24 +158,28 @@ int main(void)
       //dir1=TIM1->CR1&TIM_CR1_DIR;
       count1=__HAL_TIM_GET_COUNTER(&htim1)/4;
       dir1 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1);
+      TIM8->ARR = count1;
 
       //OK 401 411 446 NOK 030
       //count2=TIM2->CNT;
       //dir2=TIM2->CR1&TIM_CR1_DIR;
       count2=__HAL_TIM_GET_COUNTER(&htim2)/4;
       dir2 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim2);
+      TIM8->CCR2 = count2;
 
       //OK 401 411 446 030
       //count3=TIM3->CNT;
       //dir3=TIM3->CR1&TIM_CR1_DIR;
       count3=__HAL_TIM_GET_COUNTER(&htim3)/4;
       dir3 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3);
+      TIM8->CCR3 = count3;
 
       //OK 401 411 446 N/A 030
       //count4=TIM4->CNT;
       //dir4=TIM4->CR1&TIM_CR1_DIR;
       count4=__HAL_TIM_GET_COUNTER(&htim4)/4;
       dir4 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim4);
+      TIM8->CCR4 = count4;
 
       //TICKER 401 411 446 N/A 030
 //        count5=__HAL_TIM_GET_COUNTER(&timer5);
@@ -467,9 +483,9 @@ static void MX_TIM8_Init(void)
   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
 
   htim8.Instance = TIM8;
-  htim8.Init.Prescaler = 4000;
+  htim8.Init.Prescaler = 600;
   htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim8.Init.Period = 500;
+  htim8.Init.Period = 7000;
   htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim8.Init.RepetitionCounter = 0;
   if (HAL_TIM_Base_Init(&htim8) != HAL_OK)
@@ -498,7 +514,7 @@ static void MX_TIM8_Init(void)
   }
 
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 50;
+  sConfigOC.Pulse = htim8.Init.Period/3;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -509,11 +525,12 @@ static void MX_TIM8_Init(void)
     Error_Handler();
   }
 
+  sConfigOC.Pulse = (htim8.Init.Period)/3;
   if (HAL_TIM_OC_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
   }
-
+  sConfigOC.Pulse = (htim8.Init.Period)/3 - 100;
   if (HAL_TIM_OC_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
   {
     Error_Handler();
@@ -537,6 +554,7 @@ static void MX_TIM8_Init(void)
   HAL_TIM_OC_Start(&htim8, TIM_CHANNEL_2);
   HAL_TIM_OC_Start(&htim8, TIM_CHANNEL_3);
   HAL_TIM_OC_Start(&htim8, TIM_CHANNEL_4);
+
 
 }
 
@@ -630,6 +648,15 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(N5110_RST_PORT, N5110_RST_PIN, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin : Timer IT monitor */
+   GPIO_InitStruct.Pin = GPIO_PIN_10;
+   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+   GPIO_InitStruct.Pull = GPIO_NOPULL;
+   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
+   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
 }
 
 /* USER CODE BEGIN 4 */
@@ -656,6 +683,30 @@ void Error_Handler(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     //HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+
+	if(htim->Instance == TIM8)
+	{
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);
+		phase2 = !phase2;
+		if(!phase2)
+		{
+			TIM8->CCR3 = count3;
+		}
+		else
+		{
+			TIM8->CCR3 = 0;
+		}
+		phase3--;
+		if(!phase3)
+		{
+			phase3 = 3;
+			TIM8->CCR4 = count4;
+		}
+		else
+		{
+			TIM8->CCR4 = 0;
+		}
+	}
 }
 
 #ifdef USE_FULL_ASSERT
