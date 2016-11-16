@@ -687,24 +687,30 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if(htim->Instance == TIM8)
 	{
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);
+		TIM8->CCMR1 = (TIM8->CCMR2 & (~0x7000))|0x4000; // Force inactive state
+		TIM8->CCMR1 = (TIM8->CCMR2 & (~0x7000))|0x3000; // Set toggle on match
 		phase2 = !phase2;
 		if(!phase2)
 		{
-			TIM8->CCR3 = count3;
+			TIM8->CCMR2 = (TIM8->CCMR2 & (~0x0070))|0x0040;
+//			TIM8->CCR3 = count3;
 		}
 		else
 		{
-			TIM8->CCR3 = 0;
+//			TIM8->CCR3 = 0xffffffff;
+			TIM8->CCMR2 = (TIM8->CCMR2 & (~0x0070))|0x0030;
 		}
 		phase3--;
 		if(!phase3)
 		{
 			phase3 = 3;
-			TIM8->CCR4 = count4;
+			TIM8->CCMR2 = (TIM8->CCMR2 & (~0x7000))|0x4000;
+//			TIM8->CCR4 = count4;
 		}
 		else
 		{
-			TIM8->CCR4 = 0;
+			TIM8->CCMR2 = (TIM8->CCMR2 & (~0x7000))|0x3000;
+//			TIM8->CCR4 = 0xffffffff;
 		}
 	}
 }
