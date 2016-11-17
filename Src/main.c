@@ -74,6 +74,7 @@ volatile int count4;
 volatile unsigned char phase2 = 2;
 volatile unsigned char phase3 = 3;
 int8_t dir1, dir2, dir3, dir4;
+int8_t mode; // 0 - tune phase, 1 - normal work
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
                                 
@@ -690,27 +691,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		TIM8->CCMR1 = (TIM8->CCMR2 & (~0x7000))|0x4000; // Force inactive state
 		TIM8->CCMR1 = (TIM8->CCMR2 & (~0x7000))|0x3000; // Set toggle on match
 		phase2 = !phase2;
-		if(!phase2)
+
+		TIM8->CCMR2 = (TIM8->CCMR2 & (~0x0070))|0x0040;
+		if(phase2)
 		{
-			TIM8->CCMR2 = (TIM8->CCMR2 & (~0x0070))|0x0040;
-//			TIM8->CCR3 = count3;
-		}
-		else
-		{
-//			TIM8->CCR3 = 0xffffffff;
 			TIM8->CCMR2 = (TIM8->CCMR2 & (~0x0070))|0x0030;
 		}
+
 		phase3--;
+		TIM8->CCMR2 = (TIM8->CCMR2 & (~0x7000))|0x4000;
 		if(!phase3)
 		{
 			phase3 = 3;
-			TIM8->CCMR2 = (TIM8->CCMR2 & (~0x7000))|0x4000;
-//			TIM8->CCR4 = count4;
-		}
-		else
-		{
 			TIM8->CCMR2 = (TIM8->CCMR2 & (~0x7000))|0x3000;
-//			TIM8->CCR4 = 0xffffffff;
 		}
 	}
 }
