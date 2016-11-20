@@ -51,7 +51,10 @@ WWDG_HandleTypeDef hwwdg;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+/* Virtual address defined by the user: 0xFFFF value is prohibited */
+uint16_t VirtAddVarTab[NB_OF_VAR] = {0x0000, 0x0001, 0x0003, 0x0004};
+uint16_t VarDataTab[NB_OF_VAR] = {0, 0, 0, 0};
+uint16_t VarValue,VarDataTmp = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,7 +97,7 @@ int main(void)
 	// so can display a string of a maximum 14 characters in length
 	// or create formatted strings - ensure they aren't more than 14 characters long
 	// first need to initialise display
-
+  int counter = 0;
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -106,6 +109,15 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
+
+  /* Unlock the Flash Program Erase controller */
+  HAL_FLASH_Unlock();
+
+  /* EEPROM Init */
+  if( EE_Init() != EE_OK)
+  {
+    Error_Handler();
+  }
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
@@ -146,6 +158,26 @@ int main(void)
   __HAL_TIM_SET_COUNTER(&htim3,count3*4);
   __HAL_TIM_SET_COUNTER(&htim4,count4*4);
   __HAL_TIM_ENABLE_IT(&htim8, TIM_IT_UPDATE);
+  (EE_ReadVariable(VirtAddVarTab[0],  &VarDataTab[0]));
+  (EE_ReadVariable(VirtAddVarTab[1],  &VarDataTab[1]));
+  (EE_ReadVariable(VirtAddVarTab[2],  &VarDataTab[2]));
+  (EE_ReadVariable(VirtAddVarTab[3],  &VarDataTab[3]));
+  if(VarDataTab[0] && VarDataTab[0] < 0x3F00)
+  {
+	  __HAL_TIM_SET_COUNTER(&htim1,VarDataTab[0] * 4 );
+  }
+  if(VarDataTab[1] && VarDataTab[1] < 0x3F00)
+  {
+  	  __HAL_TIM_SET_COUNTER(&htim2,VarDataTab[1] * 4 );
+  }
+  if(VarDataTab[2] && VarDataTab[2] < 0x3F00)
+  {
+  	  __HAL_TIM_SET_COUNTER(&htim3,VarDataTab[2] * 4 );
+  }
+  if(VarDataTab[3] && VarDataTab[3] < 0x3F00)
+  {
+  	  __HAL_TIM_SET_COUNTER(&htim4,VarDataTab[3] * 4 );
+  }
 
   while (1)
   {
@@ -153,44 +185,38 @@ int main(void)
 	  //counter1 = __HAL_TIM_GET_COUNTER(&htim8);
 	  HAL_Delay(150);
 
-
-      //OK 401 411 446 TICKER 030
-      //count1=TIM1->CNT;
-      //dir1=TIM1->CR1&TIM_CR1_DIR;
       count1=__HAL_TIM_GET_COUNTER(&htim1)/4;
       dir1 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1);
-      TIM8->ARR = count1;
+      if( TIM8->ARR != count1)
+      {
+    	  TIM8->ARR = count1;
+    	  counter = 20; // delay write of new value with 7.5 seconds
+      }
 
-      //OK 401 411 446 NOK 030
-      //count2=TIM2->CNT;
-      //dir2=TIM2->CR1&TIM_CR1_DIR;
       count2=__HAL_TIM_GET_COUNTER(&htim2)/4;
       dir2 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim2);
-      TIM8->CCR2 = count2;
+      if( TIM8->CCR2 != count2)
+      {
+		  TIM8->CCR2 = count2;
+		  counter = 20; // delay write of new value with ~5 seconds
+	  }
 
-      //OK 401 411 446 030
-      //count3=TIM3->CNT;
-      //dir3=TIM3->CR1&TIM_CR1_DIR;
       count3=__HAL_TIM_GET_COUNTER(&htim3)/4;
       dir3 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3);
-      TIM8->CCR3 = count3;
+      if( TIM8->CCR3 != count3)
+      {
+   		  TIM8->CCR3 = count3;
+   		  counter = 20; // delay write of new value with ~5 seconds
+   	  }
 
-      //OK 401 411 446 N/A 030
-      //count4=TIM4->CNT;
-      //dir4=TIM4->CR1&TIM_CR1_DIR;
       count4=__HAL_TIM_GET_COUNTER(&htim4)/4;
       dir4 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim4);
-      TIM8->CCR4 = count4;
+      if( TIM8->CCR4 != count4)
+      {
+   		  TIM8->CCR4 = count4;
+   		  counter = 20; // delay write of new value with ~5 seconds
+   	  }
 
-      //TICKER 401 411 446 N/A 030
-//        count5=__HAL_TIM_GET_COUNTER(&timer5);
-//        dir5 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&timer5);
-//        printf("%d%s %d%s %d%s %d%s\r\n", count1, dir1==0 ? "+":"-",
-//                                             count2, dir2==0 ? "+":"-",
-//                                             count3, dir3==0 ? "+":"-",
-//                                             count4, dir4==0 ? "+":"-" );
-
-      // int temperature = encoder.getVal();
       int length = sprintf(buffer,"C1 = %06d ",count1); // print formatted data to buffer
       // it is important the format specifier ensures the length will fit in the buffer
 
@@ -217,6 +243,17 @@ int main(void)
       // can also check status of pixels using getPixel(x,y)
 
 //        lcd.clear();
+      if (counter == 1)
+      {
+    	  EE_WriteVariable(VirtAddVarTab[0],  count1);
+    	  EE_WriteVariable(VirtAddVarTab[1],  count2);
+    	  EE_WriteVariable(VirtAddVarTab[2],  count3);
+    	  EE_WriteVariable(VirtAddVarTab[3],  count4);
+      }
+      if (counter)
+      {
+    	  counter--;
+      }
   /* USER CODE BEGIN 3 */
 
   }
@@ -526,12 +563,12 @@ static void MX_TIM8_Init(void)
     Error_Handler();
   }
 
-  sConfigOC.Pulse = (htim8.Init.Period)/3;
+  sConfigOC.Pulse = 2*(htim8.Init.Period)/3;
   if (HAL_TIM_OC_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigOC.Pulse = (htim8.Init.Period)/3 - 100;
+  sConfigOC.Pulse = 3*(htim8.Init.Period)/3 - 100;
   if (HAL_TIM_OC_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
   {
     Error_Handler();

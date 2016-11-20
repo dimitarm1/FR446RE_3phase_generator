@@ -1,6 +1,8 @@
 
 #include "N5110.h"
 #include "stm32f4xx_hal.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 /**  N5110 connected to the specified pins
 *
@@ -98,7 +100,7 @@ void N5110_turnOff()
     // enter the extended mode and power down
     sendCommand(0x20 | CMD_FS_POWER_DOWN_MODE | CMD_FS_HORIZONTAL_MODE | CMD_FS_EXTENDED_MODE);
     // small delay and then turn off the power pin
-    wait_ms(10);
+    HAL_Delay(10);
 //    pwr->write(0);
 
 }
@@ -154,7 +156,7 @@ static void sendData(unsigned char data)
 static void clearRAM()
 {
     int i;
-    char data = 0;
+    uint8_t data = 0;
     HAL_GPIO_WritePin(N5110_SCE_PORT, N5110_SCE_PIN, GPIO_PIN_RESET);   //set CE low to begin frame
     for(i = 0; i < WIDTH * HEIGHT; i++) { // 48 x 84 bits = 504 bytes
     	HAL_SPI_Transmit(&hspi2,&data,1,100);  // send 0's
@@ -403,10 +405,10 @@ void N5110_drawCircle(int x0,int y0,int radius,int fill)
 
             int type = (fill==1) ? 1:0;  // black or white fill
 
-            drawLine(x+x0,y+y0,-x+x0,y+y0,type);
-            drawLine(y+x0,x+y0,-y+x0,x+y0,type);
-            drawLine(y+x0,-x+y0,-y+x0,-x+y0,type);
-            drawLine(x+x0,-y+y0,-x+x0,-y+y0,type);
+            N5110_drawLine(x+x0,y+y0,-x+x0,y+y0,type);
+            N5110_drawLine(y+x0,x+y0,-y+x0,x+y0,type);
+            N5110_drawLine(y+x0,-x+y0,-y+x0,-x+y0,type);
+            N5110_drawLine(x+x0,-y+y0,-x+x0,-y+y0,type);
         }
 
 
@@ -454,7 +456,7 @@ void N5110_drawLine(int x0,int y0,int x1,int y1,int type)
             int y = y0 + (y1-y0)*(x-x0)/(x1-x0);
 
             if (type == 0)   // if 'white' line, turn off pixel
-                clearPixel(x,y);
+            	N5110_clearPixel(x,y);
             else
                 N5110_setPixel(x,y);  // else if 'black' or 'dotted' turn on pixel
         }
@@ -469,7 +471,7 @@ void N5110_drawLine(int x0,int y0,int x1,int y1,int type)
             int x = x0 + (x1-x0)*(y-y0)/(y1-y0);
 
             if (type == 0)   // if 'white' line, turn off pixel
-                clearPixel(x,y);
+            	N5110_clearPixel(x,y);
             else
                 N5110_setPixel(x,y);  // else if 'black' or 'dotted' turn on pixel
 
@@ -491,14 +493,14 @@ void N5110_drawRect(int x0,int y0,int width,int height,int fill)
 {
 
     if (fill == 0) { // transparent, just outline
-        drawLine(x0,y0,x0+width,y0,1);  // top
-        drawLine(x0,y0+height,x0+width,y0+height,1);  // bottom
-        drawLine(x0,y0,x0,y0+height,1);  // left
-        drawLine(x0+width,y0,x0+width,y0+height,1);  // right
+    	N5110_drawLine(x0,y0,x0+width,y0,1);  // top
+    	N5110_drawLine(x0,y0+height,x0+width,y0+height,1);  // bottom
+    	N5110_drawLine(x0,y0,x0,y0+height,1);  // left
+    	N5110_drawLine(x0+width,y0,x0+width,y0+height,1);  // right
     } else { // filled rectangle
         int type = (fill==1) ? 1:0;  // black or white fill
         for (int y = y0; y<= y0+height; y++) {  // loop through rows of rectangle
-            drawLine(x0,y,x0+width,y,type);  // draw line across screen
+        	N5110_drawLine(x0,y,x0+width,y,type);  // draw line across screen
         }
     }
 
