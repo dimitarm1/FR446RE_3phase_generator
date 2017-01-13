@@ -98,6 +98,7 @@ int main(void)
 	// or create formatted strings - ensure they aren't more than 14 characters long
 	// first need to initialise display
   int counter = 0;
+  int mult = 1;
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -189,44 +190,103 @@ int main(void)
       dir1 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1);
       if( TIM8->ARR != count1)
       {
-    	  TIM8->ARR = count1;
+    	  if(counter > 18)
+    	  {
+    		  if(mult<100)
+    		  {
+    			  mult = mult * 2;
+    		  }
+    		  TIM8->ARR -= (TIM8->ARR - count1)*mult;
+    		  count1 = TIM8->ARR;
+    		  __HAL_TIM_SET_COUNTER(&htim1,count1 * 4 );
+    	  }
+		  TIM8->ARR = count1;
     	  counter = 20; // delay write of new value with 7.5 seconds
       }
 
       count2=__HAL_TIM_GET_COUNTER(&htim2)/4;
+      if(count2 > (count1-50))
+      {
+		  count2 = count1 - 54;
+		  __HAL_TIM_SET_COUNTER(&htim2,count2 * 4 );
+		  TIM8->CCR2 = count2;
+	  }
       dir2 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim2);
       if( TIM8->CCR2 != count2)
       {
+    	  if(counter > 18)
+		  {
+			  if(mult<100)
+			  {
+				  mult = mult * 2;
+			  }
+			  TIM8->CCR2 -= (TIM8->CCR2 - count2)*mult;
+			  count2 = TIM8->CCR2;
+			  __HAL_TIM_SET_COUNTER(&htim2,count2 * 4 );
+		  }
 		  TIM8->CCR2 = count2;
 		  counter = 20; // delay write of new value with ~5 seconds
 	  }
 
       count3=__HAL_TIM_GET_COUNTER(&htim3)/4;
+      if(count3 > (count1-52))
+      {
+      	  count3 = count1 - 52;
+       	  __HAL_TIM_SET_COUNTER(&htim3,count3 * 4 );
+       	 TIM8->CCR3 = count3;
+      }
       dir3 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3);
       if( TIM8->CCR3 != count3)
       {
+    	  if(counter > 18)
+		  {
+			  if(mult<100)
+			  {
+				  mult = mult * 2;
+			  }
+			  TIM8->CCR3 -= (TIM8->CCR3 - count3)*mult;
+			  count3 = TIM8->CCR3;
+			  __HAL_TIM_SET_COUNTER(&htim3,count3 * 4 );
+		  }
    		  TIM8->CCR3 = count3;
    		  counter = 20; // delay write of new value with ~5 seconds
    	  }
 
+      count4 = TIM8->CCR4 = count1 - 50;
+/*
       count4=__HAL_TIM_GET_COUNTER(&htim4)/4;
+      if(count4 > (count1-50))
+      {
+    	  count4 = count1 - 50;
+    	  __HAL_TIM_SET_COUNTER(&htim4,count4 * 4 );
+      }
       dir4 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim4);
       if( TIM8->CCR4 != count4)
       {
+    	  if(counter > 18)
+		  {
+			  if(mult<100)
+			  {
+				  mult = mult * 2;
+			  }
+			  TIM8->CCR4 -= (TIM8->CCR4 - count4)*mult;
+			  count4 = TIM8->CCR4;
+			  __HAL_TIM_SET_COUNTER(&htim4,count4 * 4 );
+		  }
    		  TIM8->CCR4 = count4;
    		  counter = 20; // delay write of new value with ~5 seconds
    	  }
-
+*/
       int length = sprintf(buffer,"C1 = %06d ",count1); // print formatted data to buffer
       // it is important the format specifier ensures the length will fit in the buffer
 
       N5110_printString(buffer,1,1);           // display on screen
-      sprintf(buffer,"C2 = %06d ",count2); // print formatted data to buffer
+      sprintf(buffer,"C2 = %06d ",((count2 + (count1-count4))*3600)/count1); // print formatted data to buffer
       N5110_printString(buffer,1,2);           // display on screen
-      sprintf(buffer,"C3 = %06d ",count3); // print formatted data to buffer
+      sprintf(buffer,"C3 = %06d ",((count3 + (count1-count4))*3600)/count1); // print formatted data to buffer
       N5110_printString(buffer,1,3);           // display on screen
-      sprintf(buffer,"C4 = %06d ",count4); // print formatted data to buffer
-      N5110_printString(buffer,1,4);           // display on screen
+      //sprintf(buffer,"C4 = %06d ",((count4 + (count1-count4))*3600)/count1); // print formatted data to buffer
+//      N5110_printString(buffer,1,4);           // display on screen
 
       // can also print individual characters at specified place
       //lcd.printChar('X',5,3);
@@ -253,6 +313,10 @@ int main(void)
       if (counter)
       {
     	  counter--;
+      }
+      if(counter < 18)
+      {
+    	  mult = 1;
       }
   /* USER CODE BEGIN 3 */
 
@@ -284,7 +348,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 8;
   RCC_OscInitStruct.PLL.PLLN = 180;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
   RCC_OscInitStruct.PLL.PLLQ = 2;
   RCC_OscInitStruct.PLL.PLLR = 2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -521,7 +585,7 @@ static void MX_TIM8_Init(void)
   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
 
   htim8.Instance = TIM8;
-  htim8.Init.Prescaler = 600;
+  htim8.Init.Prescaler = 1;
   htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim8.Init.Period = 7000;
   htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -553,8 +617,8 @@ static void MX_TIM8_Init(void)
 
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
   sConfigOC.Pulse = htim8.Init.Period/3;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_LOW;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
