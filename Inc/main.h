@@ -41,15 +41,14 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define N5110_PWR_PORT
-#define N5110_PWR_PIN
+#define N5110_PWR_PORT  GPIOC
+#define N5110_PWR_PIN  (GPIO_PIN_5 | GPIO_PIN_6)
 #define N5110_SCE_PORT GPIOA
 #define N5110_SCE_PIN GPIO_PIN_4
 #define N5110_DC_PORT GPIOB
 #define N5110_DC_PIN GPIO_PIN_9
 #define N5110_RST_PORT GPIOB
 #define N5110_RST_PIN GPIO_PIN_14
-#define N5110_PWR_PORT
 #define N5110_SPIx SPI2
 
 #define B1_Pin GPIO_PIN_13

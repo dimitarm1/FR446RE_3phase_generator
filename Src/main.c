@@ -170,14 +170,17 @@ int main(void)
   if(VarDataTab[1] && VarDataTab[1] < 0x3F00)
   {
   	  __HAL_TIM_SET_COUNTER(&htim2,VarDataTab[1] * 4 );
+  	  TIM8->CCR2 = VarDataTab[1];
   }
   if(VarDataTab[2] && VarDataTab[2] < 0x3F00)
   {
   	  __HAL_TIM_SET_COUNTER(&htim3,VarDataTab[2] * 4 );
+  	  TIM8->CCR3 = VarDataTab[2];
   }
   if(VarDataTab[3] && VarDataTab[3] < 0x3F00)
   {
   	  __HAL_TIM_SET_COUNTER(&htim4,VarDataTab[3] * 4 );
+  	  TIM8->CCR4 = VarDataTab[3];
   }
 
   while (1)
@@ -192,9 +195,9 @@ int main(void)
       {
     	  if(counter > 18)
     	  {
-    		  if(mult<100)
+    		  if(mult<5)
     		  {
-    			  mult = mult * 2;
+    			  mult = mult + 1;
     		  }
     		  TIM8->ARR -= (TIM8->ARR - count1)*mult;
     		  count1 = TIM8->ARR;
@@ -216,9 +219,9 @@ int main(void)
       {
     	  if(counter > 18)
 		  {
-			  if(mult<100)
+			  if(mult<5)
 			  {
-				  mult = mult * 2;
+				  mult = mult + 1;
 			  }
 			  TIM8->CCR2 -= (TIM8->CCR2 - count2)*mult;
 			  count2 = TIM8->CCR2;
@@ -240,9 +243,9 @@ int main(void)
       {
     	  if(counter > 18)
 		  {
-			  if(mult<100)
+			  if(mult<5)
 			  {
-				  mult = mult * 2;
+				  mult = mult + 1;
 			  }
 			  TIM8->CCR3 -= (TIM8->CCR3 - count3)*mult;
 			  count3 = TIM8->CCR3;
@@ -737,6 +740,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(N5110_RST_PORT, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : N5110_PWR_PIN */
+  GPIO_InitStruct.Pin = N5110_PWR_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(N5110_PWR_PORT, &GPIO_InitStruct);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);

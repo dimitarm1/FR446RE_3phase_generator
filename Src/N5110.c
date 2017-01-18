@@ -79,7 +79,11 @@ void N5110_inverseMode()
 // function to power up the LCD and backlight
 static void turnOn()
 {
+
+	HAL_GPIO_WritePin(N5110_PWR_PORT, N5110_PWR_PIN, GPIO_PIN_RESET);
+	HAL_Delay(500);
     // set brightness of LED - 0.0 to 1.0 - default is 50%
+    HAL_GPIO_WritePin(N5110_PWR_PORT, N5110_PWR_PIN, GPIO_PIN_SET);
 	N5110_setBrightness(0.5);
 //    pwr->write(1);  // apply power
 }
@@ -101,6 +105,7 @@ void N5110_turnOff()
     sendCommand(0x20 | CMD_FS_POWER_DOWN_MODE | CMD_FS_HORIZONTAL_MODE | CMD_FS_EXTENDED_MODE);
     // small delay and then turn off the power pin
     HAL_Delay(10);
+    HAL_GPIO_WritePin(N5110_PWR_PORT, N5110_PWR_PIN, GPIO_PIN_RESET);
 //    pwr->write(0);
 
 }
@@ -128,6 +133,7 @@ static void reset()
 {
     // reset the LCD
     HAL_GPIO_WritePin(N5110_RST_PORT, N5110_RST_PIN, GPIO_PIN_RESET);
+    HAL_Delay(1);
     HAL_GPIO_WritePin(N5110_RST_PORT, N5110_RST_PIN, GPIO_PIN_SET);
 }
 
